@@ -1,0 +1,422 @@
+public class StudentUser {
+    private String name;
+    private String dob;
+    private String emiratesId;
+    private String interests;
+    private String university;
+
+    public StudentUser(String name, String dob, String emiratesId, String interests, String university) {
+        this.name = name;
+        this.dob = dob;
+        this.emiratesId = emiratesId;
+        this.interests = interests;
+        this.university = university;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDob() {
+        return dob;
+    }
+
+    public String getEmiratesId() {
+        return emiratesId;
+    }
+
+    public String getInterests() {
+        return interests;
+    }
+
+    public String getUniversity() {
+        return university;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + name + "\n" +
+               "Date of Birth: " + dob + "\n" +
+               "University: " + university + "\n" +
+               "Interests: " + interests + "\n";
+    }
+}
+.root {
+    -fx-background-color: pink;
+}
+
+.label {
+    -fx-font-size: 30px;
+    -fx-font-style: italic;
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+}
+
+.text-field, .date-picker, .combo-box, .password-field {
+    -fx-pref-width: 300px;
+    -fx-font-size: 16px;
+    -fx-background-color: #F8D7DA;
+    -fx-text-fill: black;
+    -fx-border-radius: 30px;
+    -fx-border-color: black;
+}
+
+.button {
+    -fx-background-color: #ff4d4d;
+    -fx-text-fill: white;
+    -fx-font-size: 18px;
+    -fx-padding: 10px 20px;
+}
+
+.button:default {
+    -fx-background-color: #4CAF50;
+    -fx-font-size: 18px;
+}
+
+.list-view {
+    -fx-pref-height: 200px;
+}
+
+.text-area {
+    -fx-pref-width: 300px;
+    -fx-font-size: 16px;
+    -fx-background-color: #fff2f2;
+}
+
+.uploaded-image-view {
+    -fx-fit-width: 200px;
+    -fx-fit-height: 200px;
+}
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.stage.*;
+import javafx.geometry.Pos;
+import java.util.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import java.io.File;
+
+public class VibeX extends Application {
+    private List<StudentUser> users = new ArrayList<>();
+    private VBox mainLayout;
+    private Label titleLabel, subtitleLabel;
+    private TextField nameField, emiratesIdField, interestsField, captchaField;
+    private DatePicker dobPicker;
+    private Button registerButton, searchButton, passButton, startConversationButton, exitButton;
+    private ListView<String> resultList;
+    private ComboBox<String> universityComboBox;
+    private Button uploadPhotoButton;
+    private TextArea chatBox;
+    private StudentUser matchedUser;
+    private Stage conversationStage;
+    private String currentCaptcha;
+    private ImageView uploadedPhoto;
+    private final List<String> universities = Arrays.asList(
+            "BITS Pilani", "Manipal University", "Amity University", "University of Wollongong",
+            "American University in Dubai", "University of Dubai", "Middlesex University Dubai"
+    );
+
+    public static void main(String[] args) {
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+        Stage splashStage = new Stage();
+        VBox splashLayout = new VBox(20);
+        splashLayout.setAlignment(Pos.CENTER);
+        titleLabel = new Label("VibeX");
+        titleLabel.setStyle("-fx-font-size: 30px; -fx-font-style: italic; -fx-text-fill: red; -fx-font-weight: bold;");
+        subtitleLabel = new Label("SOCIALISE, MEET AND GREET FRIENDS!!");
+        subtitleLabel.setStyle("-fx-font-size: 20px; -fx-font-style: italic; -fx-text-fill: red;");
+        Button openAppButton = new Button("OPEN THE APP");
+        openAppButton.setStyle("-fx-background-color: #ff4d4d; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10px 20px;");
+        openAppButton.setOnAction(e -> {
+            splashStage.close();
+            showMainWindow(primaryStage);
+        });
+
+        splashLayout.getChildren().addAll(titleLabel, subtitleLabel, openAppButton);
+        Scene splashScene = new Scene(splashLayout, 600, 500);
+        splashStage.setTitle("SOCIALISE, MEET AND GREET FRIENDS!!");
+        splashStage.setScene(splashScene);
+        splashStage.show();
+    }
+
+    private void showMainWindow(Stage primaryStage) {
+        mainLayout = new VBox(20);
+        mainLayout.setStyle("-fx-background-color: pink;");
+        mainLayout.setPrefWidth(600);
+        mainLayout.setPrefHeight(500);
+        mainLayout.setAlignment(Pos.CENTER);
+
+        titleLabel = new Label("VibeX");
+        titleLabel.setStyle("-fx-font-size: 30px; -fx-font-style: italic; -fx-text-fill: red; -fx-font-weight: bold;");
+        subtitleLabel = new Label("SOCIALISE, MEET AND GREET FRIENDS!!");
+        subtitleLabel.setStyle("-fx-font-size: 20px; -fx-font-style: italic; -fx-text-fill: red;");
+        nameField = new TextField();
+        nameField.setPromptText("Enter Name");
+        nameField.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #F8D7DA; -fx-text-fill: black; -fx-border-radius: 30px; -fx-border-color: black;");
+
+        dobPicker = new DatePicker();
+        dobPicker.setPromptText("Select Date of Birth");
+        dobPicker.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #F8D7DA; -fx-text-fill: black; -fx-border-radius: 30px; -fx-border-color: black;");
+
+        emiratesIdField = new PasswordField();
+        emiratesIdField.setPromptText("Enter Emirates ID");
+        emiratesIdField.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #F8D7DA; -fx-text-fill: black; -fx-border-radius: 30px; -fx-border-color: black;");
+
+        interestsField = new TextField();
+        interestsField.setPromptText("Enter Interests");
+        interestsField.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #F8D7DA; -fx-text-fill: black; -fx-border-radius: 30px; -fx-border-color: black;");
+
+        universityComboBox = new ComboBox<>();
+        universityComboBox.getItems().addAll(universities);
+        universityComboBox.setPromptText("Select University");
+        universityComboBox.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-border-radius: 30px; -fx-border-color: black;");
+
+        captchaField = new TextField();
+        captchaField.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #F8D7DA; -fx-text-fill: black; -fx-border-radius: 30px; -fx-border-color: black;");
+        
+        currentCaptcha = generateCaptcha();
+        captchaField.setPromptText("Enter CAPTCHA: " + currentCaptcha);
+
+        registerButton = new Button("Register");
+        registerButton.setStyle("-fx-background-color: #ff4d4d; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10px 20px;");
+        registerButton.setOnAction(e -> registerUser());
+
+        searchButton = new Button("Search Friends by Interest");
+        searchButton.setStyle("-fx-background-color: #ff4d4d; -fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 10px 20px;");
+        searchButton.setOnAction(e -> searchFriendsByInterest());
+
+        resultList = new ListView<>();
+        resultList.setPrefHeight(200);
+
+        uploadPhotoButton = new Button("Upload Photo");
+        uploadPhotoButton.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-size: 18px;");
+        uploadPhotoButton.setOnAction(e -> uploadPhoto());
+
+        passButton = new Button("Pass");
+        passButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 18px;");
+        passButton.setVisible(false);
+        passButton.setOnAction(e -> passUser());
+
+        startConversationButton = new Button("Start Conversation");
+        startConversationButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 18px;");
+        startConversationButton.setVisible(false);
+        startConversationButton.setOnAction(e -> startConversation());
+
+        exitButton = new Button("Exit");
+        exitButton.setStyle("-fx-background-color: black; -fx-text-fill: white; -fx-font-size: 18px;");
+        exitButton.setOnAction(e -> System.exit(0));
+
+        chatBox = new TextArea();
+        chatBox.setPrefHeight(200);
+        chatBox.setPromptText("Chat here...");
+        chatBox.setStyle("-fx-pref-width: 300px; -fx-font-size: 16px; -fx-background-color: #fff2f2;");
+
+        uploadedPhoto = new ImageView();
+        uploadedPhoto.setFitWidth(150);
+        uploadedPhoto.setFitHeight(150);
+        
+        HBox universityLayout = new HBox(10);
+        universityLayout.setAlignment(Pos.CENTER);
+        universityLayout.getChildren().addAll(universityComboBox, uploadPhotoButton);
+
+        mainLayout.getChildren().addAll(titleLabel, subtitleLabel, nameField, dobPicker, emiratesIdField, interestsField, universityLayout,
+                captchaField, registerButton, searchButton, resultList, uploadedPhoto, passButton, startConversationButton, exitButton, chatBox);
+
+        ScrollPane scrollPane = new ScrollPane(mainLayout);
+        scrollPane.setFitToWidth(true);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.ALWAYS);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        Scene scene = new Scene(scrollPane, 600, 500);
+        primaryStage.setTitle("VibeX");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+
+private void registerUser() {
+    String name = nameField.getText();
+    String dob = dobPicker.getValue() != null ? dobPicker.getValue().toString() : "";
+    String emiratesId = emiratesIdField.getText();
+    String interests = interestsField.getText();
+    String university = universityComboBox.getValue();
+
+    // Check for empty fields
+    if (name.isEmpty() || dob.isEmpty() || emiratesId.isEmpty() || interests.isEmpty() || university == null) {
+        showAlert("ERROR", "FILL IN ALL REQUIRED FIELDS", Alert.AlertType.ERROR);
+        return;
+    }
+
+    // Check Emirates ID validity
+    if (!isValidEmiratesId(emiratesId)) {
+        showAlert("ERROR", "INVALID EMIRATES ID FORMAT", Alert.AlertType.ERROR);
+        return;
+    }
+
+    // Check if Emirates ID already exists
+    for (StudentUser user : users) {
+        if (user.getEmiratesId().equals(emiratesId)) {
+            showAlert("ERROR", "INVALID, ID CANNOT BE SAME", Alert.AlertType.ERROR);
+            return;
+        }
+    }
+
+    // Add user if all validations pass
+    StudentUser user = new StudentUser(name, dob, emiratesId, interests, university);
+    users.add(user);
+    showAlert("SUCCESS", "User Registered Successfully", Alert.AlertType.INFORMATION);
+    resetFields();
+}
+
+
+    private void resetFields() {
+        nameField.clear();
+        dobPicker.setValue(null);
+        emiratesIdField.clear();
+        interestsField.clear();
+        universityComboBox.setValue(null);
+        captchaField.clear();
+        currentCaptcha = generateCaptcha();
+        captchaField.setPromptText("Enter CAPTCHA: " + currentCaptcha);
+        uploadedPhoto.setImage(null);
+    }
+
+private void searchFriendsByInterest() {
+    TextInputDialog inputDialog = new TextInputDialog();
+    inputDialog.setHeaderText("Enter Interests to Search:");
+    inputDialog.setContentText("Interests:");
+    Optional<String> result = inputDialog.showAndWait();
+
+    if (result.isPresent()) {
+        String searchInterests = result.get();
+        List<StudentUser> matches = new ArrayList<>();
+
+        // Find matches based on interests
+        for (StudentUser user : users) {
+            if (user.getInterests().contains(searchInterests)) {
+                matches.add(user);
+            }
+        }
+
+        // Display appropriate pop-up based on the matches found
+        if (matches.isEmpty()) {
+            showAlert("NO MATCH", "SORRY, BETTER LUCK NEXT TIME!!", Alert.AlertType.INFORMATION);
+        } else {
+            StringBuilder matchDetails = new StringBuilder("CONGRATULATIONS, YOU FOUND A MATCH!!\n\nMatched Users:\n");
+            for (StudentUser match : matches) {
+                matchDetails.append(match.toString()).append("\n");
+            }
+            showAlert("MATCH FOUND", matchDetails.toString(), Alert.AlertType.INFORMATION);
+
+            // Enable buttons for further actions
+            passButton.setStyle("-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-size: 18px;");
+            startConversationButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 18px;");
+            passButton.setVisible(true);
+            startConversationButton.setVisible(true);
+        }
+    }
+}
+
+private void passUser() {
+    showAlert("Pass", "NO WORRIES, YOU WILL FIND MORE PEOPLE SOON!!", Alert.AlertType.INFORMATION);
+}
+
+
+ private void startConversation() {
+    conversationStage = new Stage();
+    conversationStage.setTitle("Chat with Matched User");
+
+    VBox chatLayout = new VBox(10);
+    chatLayout.setAlignment(Pos.CENTER);
+    chatLayout.setStyle("-fx-padding: 20; -fx-background-color: #f0f0f0;");
+
+    TextArea chatArea = new TextArea();
+    chatArea.setEditable(false);
+    chatArea.setPrefHeight(300);
+    chatArea.setStyle("-fx-font-size: 14px;");
+
+    TextField messageField = new TextField();
+    messageField.setPromptText("Type your message...");
+    messageField.setStyle("-fx-font-size: 14px;");
+
+    Button sendButton = new Button("SEND");
+    sendButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 14px;");
+    sendButton.setOnAction(e -> {
+        String message = messageField.getText().trim();
+        if (!message.isEmpty()) {
+            chatArea.appendText("You: " + message + "\n");
+            messageField.clear();
+        }
+    });
+    
+
+
+    Button sharePhotoButton = new Button("Share Photo");
+    sharePhotoButton.setStyle("-fx-background-color: #8e44ad; -fx-text-fill: white; -fx-font-size: 14px;");
+    sharePhotoButton.setOnAction(e -> {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", ".png", ".jpg", "*.jpeg"));
+        File file = fileChooser.showOpenDialog(conversationStage);
+        if (file != null) {
+            chatArea.appendText("You shared a photo: " + file.getName() + "\n");
+        }
+    });
+
+    HBox inputLayout = new HBox(10);
+    inputLayout.setAlignment(Pos.CENTER);
+    inputLayout.getChildren().addAll(messageField, sendButton, sharePhotoButton);
+
+    chatLayout.getChildren().addAll(chatArea, inputLayout);
+
+    Scene chatScene = new Scene(chatLayout, 400, 400);
+    conversationStage.setScene(chatScene);
+    conversationStage.show();
+}
+
+
+
+
+    private void uploadPhoto() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", ".png", ".jpg", "*.jpeg"));
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            Image image = new Image(file.toURI().toString());
+            uploadedPhoto.setImage(image);
+        }
+    }
+
+    private boolean isValidEmiratesId(String emiratesId) {
+        return emiratesId.matches("\\d{3}-\\d{4}-\\d{7}-\\d{1}");
+    }
+
+    private String generateCaptcha() {
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        Random random = new Random();
+        StringBuilder captcha = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            captcha.append(characters.charAt(random.nextInt(characters.length())));
+        }
+        return captcha.toString();
+    }
+
+    private void showAlert(String title, String message, Alert.AlertType alertType) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+}
